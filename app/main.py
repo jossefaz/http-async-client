@@ -1,4 +1,5 @@
 from enum import Enum
+from functools import partial
 from typing import Union
 
 import httpx
@@ -112,3 +113,24 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
         # remove the first "/" at the beginning
         url = re.sub('^/', '', url)
         return f"{self.get_base_url()}/{url}"
+
+    @classmethod
+    def get_instance(cls, *, host, port=None, protocol=None) -> "partial[BaseRESTAsyncClient]":
+        """
+        Will return a factory (as a partial function) in order to always ensure the current endpoint is selected in the endpoints registry
+        :param host: str
+        :param port: int
+        :param protocol: str (must be a value of the SupportedProtocols Enum
+        :return:partial  function (BaseRESTAsyncClient factory)
+        """
+        return partial(BaseRESTAsyncClient, host=host, port=port, protocol=protocol)
+
+    def __call__(self, *args, **kwargs):
+        """
+        Will trow an error that avoid BaseRESTAsyncClient to be called directly and force use the get_instance class method
+        """
+        raise TypeError("BaseClient cannot be called directly use get_instance class method instead")
+
+    async def get(self, url: str = "", params:dict={}):
+        async with httpx.AsyncClient() as client:
+            return await client.get(self.make_url(url))
