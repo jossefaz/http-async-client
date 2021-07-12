@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Union, Dict
+from typing import Union, Dict, Optional
 from app.enums import SupportedProtocols, Methods
 import httpx
 import re
@@ -12,6 +12,9 @@ from httpx import Request
 
 
 class EndPointRegistry(type):
+    """This Class is a singleton that inherits from the `type` class, in order to provide it as a metaclass to other classes
+    """
+
     def __init__(cls, *args, **kwargs):
         cls.__instance = None
         cls._locker = threading.Lock()
@@ -43,9 +46,6 @@ class EndPointRegistry(type):
             raise TypeError(f"Cannot encode base url to registry : {str(te)}")
 
 
-
-
-
 @dataclass
 class EndPoint:
     host: str
@@ -54,9 +54,9 @@ class EndPoint:
 
     @property
     def base_url(self) -> Union[bool, str]:
-        """
-        Build the base url based on the protocol, the host and the port. Only host is mandatory, others will be ignored or given default value
-        :return: base url
+        """Build the base url based on the protocol, the host and the port. Only host is mandatory, others will be ignored or given default value.
+        Returns:
+            The Base URL following this template "{protocol}://{host}:{port}"
         """
         if not self.host:
             return False
@@ -65,9 +65,9 @@ class EndPoint:
 
     @property
     def protocol(self) -> SupportedProtocols:
-        """
-        Get the protocol if the one that was given in constructor is supported, otherwise give the default http protocol
-        :return: Entry of the enum SupportedProtocols
+        """Get the protocol if the one that was given in constructor is supported, otherwise give the default http protocol
+        Returns:
+             Entry of the enum SupportedProtocols
         """
         if self._protocol in SupportedProtocols.__members__:
             return SupportedProtocols[self._protocol]
@@ -79,21 +79,27 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
         self._request_id = None
 
     @classmethod
-    def get_instance(cls, *, host, port=None, protocol=None) -> "partial[BaseRESTAsyncClient]":
-        """
-        Will return a factory (as a partial function) in order to always ensure the current endpoint is selected in the endpoints registry
-        :param host: str
-        :param port: int
-        :param protocol: str (must be a value of the SupportedProtocols Enum
-        :return:partial  function (BaseRESTAsyncClient factory)
+    def get_instance(cls, *, host: str, port: Optional[int] = None,
+                     protocol: Optional[str] = None) -> "partial[BaseRESTAsyncClient]":
+        """Will return a factory (as a partial function) in order to always ensure the current endpoint is selected in the endpoints registry
+        Arguments:
+            host: domain's host
+            port: listening port
+            protocol: Network Protocol (must be a value of the SupportedProtocols Enum)
+        Returns:
+            partial  function (BaseRESTAsyncClient factory)
+        Example:
+            ```python
+             client = BaseRESTAsyncClient.get_instance("example.com", 8080, "https")
+            ```
         """
         return partial(BaseRESTAsyncClient, host=host, port=port, protocol=protocol)
 
     @property
-    def request_id(self):
-        """
-        Getter for the request id
-        :return:
+    def request_id(self) -> str:
+        """Getter for the request id
+        Returns:
+            nanoid: uid of the current request
         """
         if not self._request_id:
             return None
@@ -101,10 +107,8 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
 
     @request_id.setter
     def request_id(self, value):
-        """
-        Setter for the request id
+        """Setter for the request id
         TODO: Check if there is any pre existing request ID from the incoming request headers and generate one ONLY IF there is no
-        :return: Nano ID
         """
         self._request_id = generate()
 
@@ -112,10 +116,11 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
         return self.endpoints_registry[self.current].base_url
 
     def make_url(self, url: str = ""):
-        """
-        Url builder based on the host base url
-        :param url: relative url that will be concatenate wil the host base url
-        :return: An absolute url including the protocol, the host base url, port (if any) and the relative url if any
+        """Url builder based on the host base url
+        Arguments:
+            url: relative url that will be concatenate wil the host base url
+        Returns:
+            string: An absolute url including the protocol, the host base url, port (if any) and the relative url if any
         """
         # Ensure to remove keep only one "/" along all the url
         url = re.sub('/+', '/', url)
@@ -124,6 +129,12 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
         return f"{self.get_base_url()}/{url}"
 
     async def _send_request(self, req: Request):
+        """
+        Arguments:
+            req: a Request ([httpx](https://www.python-httpx.org/api/#request) type)
+        Returns:
+            coroutine: handle the HTTP response by awaiting it
+        """
         async with httpx.AsyncClient() as client:
             return await client.send(req)
 
@@ -133,6 +144,16 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
                   params: QueryParamTypes = None,
                   headers: HeaderTypes = None,
                   cookies: CookieTypes = None):
+        """Prepare an HTTP `GET` request and send it asynchronously
+
+        Arguments:
+            url: Relative URL (from the base URL)
+            params: Query string
+            headers: HTTP Headers (Key Value)
+            cookies: HTTP Cookies
+        Returns:
+            coroutine : result of the `_send_request` method. It need to be awaited in order to get the HTTP response
+        """
         request = Request(Methods.get.value, self.make_url(url), params=params, headers=headers, cookies=cookies)
         return await self._send_request(request)
 
@@ -144,6 +165,18 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
                    content: RequestContent = None,
                    data: RequestData = None,
                    files: RequestFiles = None):
+        """Prepare an HTTP `POST` request and send it asynchronously
+
+        Arguments:
+           url: Relative URL (from the base URL)
+           headers: HTTP Headers (Key Value)
+           cookies: HTTP Cookies
+           data: JSON, Files, Form,
+           content: All contents that are NOT one of : Form encoded, Multipart files, JSON. Could be use for text or binaries
+           files: Blob stream
+        Returns:
+            coroutine : result of the `_send_request` method. It need to be awaited in order to get the HTTP response
+        """
         request = Request(Methods.post.value, self.make_url(url),
                           content=content,
                           data=data,
@@ -157,15 +190,22 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
                   *,
                   headers: HeaderTypes = None,
                   cookies: CookieTypes = None,
-                  content: RequestContent = None,
-                  data: RequestData = None,
-                  files: RequestFiles = None):
+                  data: RequestData = None):
+        """Prepare an HTTP `PUT` request and send it asynchronously
+
+        Arguments:
+           url: Relative URL (from the base URL)
+           headers: HTTP Headers (Key Value)
+           cookies: HTTP Cookies
+           data: JSON, Files, Form,
+        Returns:
+            coroutine : result of the `_send_request` method. It need to be awaited in order to get the HTTP response
+        """
         request = Request(Methods.put.value, self.make_url(url),
-                          content=content,
                           data=data,
-                          files=files,
                           headers=headers,
                           cookies=cookies)
+
         return await self._send_request(request)
 
     async def patch(self,
@@ -173,13 +213,19 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
                     *,
                     headers: HeaderTypes = None,
                     cookies: CookieTypes = None,
-                    content: RequestContent = None,
-                    data: RequestData = None,
-                    files: RequestFiles = None):
+                    data: RequestData = None):
+        """Prepare an HTTP `PATCH` request and send it asynchronously
+
+        Arguments:
+           url: Relative URL (from the base URL)
+           headers: HTTP Headers (Key Value)
+           cookies: HTTP Cookies
+           data: JSON, Files, Form,
+        Returns:
+            coroutine : result of the `_send_request` method. It need to be awaited in order to get the HTTP response
+        """
         request = Request(Methods.patch.value, self.make_url(url),
-                          content=content,
                           data=data,
-                          files=files,
                           headers=headers,
                           cookies=cookies)
         return await self._send_request(request)
@@ -190,6 +236,16 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
                      params: QueryParamTypes = None,
                      headers: HeaderTypes = None,
                      cookies: CookieTypes = None):
+        """Prepare an HTTP `DELETE` request and send it asynchronously
+
+        Arguments:
+            url: Relative URL (from the base URL)
+            params: Query string
+            headers: HTTP Headers (Key Value)
+            cookies: HTTP Cookies
+        Returns:
+            coroutine : result of the `_send_request` method. It need to be awaited in order to get the HTTP response
+        """
         request = Request(Methods.delete.value, self.make_url(url), params=params, headers=headers, cookies=cookies)
         return await self._send_request(request)
 
@@ -198,3 +254,6 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
         Will trow an error that avoid BaseRESTAsyncClient to be called directly and force use the get_instance class method
         """
         raise TypeError("BaseClient cannot be called directly use get_instance class method instead")
+
+
+async_client_factory = BaseRESTAsyncClient.get_instance

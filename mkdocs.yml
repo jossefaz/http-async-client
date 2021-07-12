@@ -1,0 +1,20 @@
+site_name: AsyncHttp Client for python
+site_description: "This package contains an implementation of the HTTPX library with a main class that could be used to communicates to REST API services asynchronously"
+
+theme:
+  name: "material"
+  palette:
+    primary: "blue"
+    accent: "grey"
+
+plugins :
+  - search
+  - mkdocstrings
+
+markdown_extension:
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - "Get start" : index.md
+  - "API Reference" : api.md
