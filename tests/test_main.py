@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Any
 import pytest
 from pytest_httpx import HTTPXMock
 from app.main import BaseRESTAsyncClient, EndPoint
@@ -57,14 +57,83 @@ def test_end_point_data_class(host: str, port: int, protocol: str,
 @pytest.mark.http_async
 @pytest.mark.asyncio
 @pytest.mark.parametrize("host, port, protocol, expected_status_code", [
-    ("google.com", None, "https", 200),
+    ("localhost", 3000, "http", 200),
 ], ids=["Async get return expected status code"])
-async def test_end_point_data_class(http_client, internet_connection, httpx_mock, monkeypatch, host: str, port: int, protocol: str,
-                                    expected_status_code: int):
+async def test_get_async(http_client, internet_connection, httpx_mock, monkeypatch, host: str, port: int, protocol: str,
+                         expected_status_code: int):
     if not internet_connection:
         host = "local"
         httpx_mock.add_response(status_code=expected_status_code)
 
     rest_client = http_client(host=host, port=port, protocol=protocol)
-    response = await rest_client().get()
+    response = await rest_client().get("content")
+    assert response.status_code == expected_status_code
+
+
+@pytest.mark.http_async
+@pytest.mark.asyncio
+@pytest.mark.parametrize("host, port, protocol, expected_status_code", [
+    ("localhost", 3000, "http", 204),
+], ids=["Async get return expected status code"])
+async def test_delete_async(http_client, internet_connection, httpx_mock, monkeypatch, host: str, port: int,
+                            protocol: str,
+                            expected_status_code: int):
+    if not internet_connection:
+        host = "local"
+        httpx_mock.add_response(status_code=expected_status_code)
+
+    rest_client = http_client(host=host, port=port, protocol=protocol)
+    response = await rest_client().delete("content")
+    assert response.status_code == expected_status_code
+
+
+@pytest.mark.http_async
+@pytest.mark.asyncio
+@pytest.mark.parametrize("host, port, protocol, body, headers, expected_status_code", [
+    ("localhost", 3000, "http",
+     {
+         "title": 'foo',
+         "body": 'bar',
+         "userId": 1,
+     },
+     {
+         'Content-type': 'application/json; charset=UTF-8',
+     },
+     201),
+], ids=["Async post return expected status code"])
+async def test_post_async(http_client, internet_connection, httpx_mock, monkeypatch, host: str, port: int,
+                          protocol: str, body: dict[str, Any], headers: dict[str, str],
+                          expected_status_code: int):
+    if not internet_connection:
+        host = "local"
+        httpx_mock.add_response(status_code=expected_status_code)
+
+    rest_client = http_client(host=host, port=port, protocol=protocol)
+    response = await rest_client().post("content", headers=headers, data=body)
+    assert response.status_code == expected_status_code
+
+
+@pytest.mark.http_async
+@pytest.mark.asyncio
+@pytest.mark.parametrize("host, port, protocol, body, headers, expected_status_code", [
+    ("localhost", 3000, "http",
+     {
+         "title": "",
+         "body": "",
+         "userId": 1,
+     },
+     {
+         'Content-type': 'application/json; charset=UTF-8',
+     },
+     204),
+], ids=["Async post return expected status code"])
+async def test_put_async(http_client, internet_connection, httpx_mock, monkeypatch, host: str, port: int,
+                         protocol: str, body: dict[str, Any], headers: dict[str, str],
+                         expected_status_code: int):
+    if not internet_connection:
+        host = "local"
+        httpx_mock.add_response(status_code=expected_status_code)
+
+    rest_client = http_client(host=host, port=port, protocol=protocol)
+    response = await rest_client().put("content", headers=headers, data=body)
     assert response.status_code == expected_status_code

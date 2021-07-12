@@ -1,14 +1,18 @@
+import typing
 from enum import Enum
 from functools import partial
-from typing import Union
+from typing import Union, Dict
 
 import httpx
 import re
 
 from dataclasses import dataclass
+
+from httpx._types import RequestContent, URLTypes, RequestData, RequestFiles, QueryParamTypes, HeaderTypes, CookieTypes
 from nanoid import generate
 import base64
 import threading
+from httpx import Request
 
 
 class EndPointRegistry(type):
@@ -48,6 +52,14 @@ class SupportedProtocols(Enum):
     https = "https"
 
 
+class Methods(Enum):
+    get = "GET"
+    post = "POST"
+    put = "PUT"
+    patch = "PATCH"
+    delete = "DELETE"
+
+
 @dataclass
 class EndPoint:
     host: str
@@ -79,6 +91,17 @@ class EndPoint:
 class BaseRESTAsyncClient(metaclass=EndPointRegistry):
     def __init__(self, *, host, port=None, protocol=None):
         self._request_id = None
+
+    @classmethod
+    def get_instance(cls, *, host, port=None, protocol=None) -> "partial[BaseRESTAsyncClient]":
+        """
+        Will return a factory (as a partial function) in order to always ensure the current endpoint is selected in the endpoints registry
+        :param host: str
+        :param port: int
+        :param protocol: str (must be a value of the SupportedProtocols Enum
+        :return:partial  function (BaseRESTAsyncClient factory)
+        """
+        return partial(BaseRESTAsyncClient, host=host, port=port, protocol=protocol)
 
     @property
     def request_id(self):
@@ -114,23 +137,78 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
         url = re.sub('^/', '', url)
         return f"{self.get_base_url()}/{url}"
 
-    @classmethod
-    def get_instance(cls, *, host, port=None, protocol=None) -> "partial[BaseRESTAsyncClient]":
-        """
-        Will return a factory (as a partial function) in order to always ensure the current endpoint is selected in the endpoints registry
-        :param host: str
-        :param port: int
-        :param protocol: str (must be a value of the SupportedProtocols Enum
-        :return:partial  function (BaseRESTAsyncClient factory)
-        """
-        return partial(BaseRESTAsyncClient, host=host, port=port, protocol=protocol)
+    async def _send_request(self, req: Request):
+        async with httpx.AsyncClient() as client:
+            return await client.send(req)
+
+    async def get(self,
+                  url: URLTypes = "",
+                  *,
+                  params: QueryParamTypes = None,
+                  headers: HeaderTypes = None,
+                  cookies: CookieTypes = None):
+        request = Request(Methods.get.value, self.make_url(url), params=params, headers=headers, cookies=cookies)
+        return await self._send_request(request)
+
+    async def post(self,
+                   url: URLTypes = "",
+                   *,
+                   headers: HeaderTypes = None,
+                   cookies: CookieTypes = None,
+                   content: RequestContent = None,
+                   data: RequestData = None,
+                   files: RequestFiles = None):
+        request = Request(Methods.post.value, self.make_url(url),
+                          content=content,
+                          data=data,
+                          files=files,
+                          headers=headers,
+                          cookies=cookies)
+        return await self._send_request(request)
+
+    async def put(self,
+                   url: URLTypes = "",
+                   *,
+                   headers: HeaderTypes = None,
+                   cookies: CookieTypes = None,
+                   content: RequestContent = None,
+                   data: RequestData = None,
+                   files: RequestFiles = None):
+        request = Request(Methods.put.value, self.make_url(url),
+                          content=content,
+                          data=data,
+                          files=files,
+                          headers=headers,
+                          cookies=cookies)
+        return await self._send_request(request)
+
+    async def patch(self,
+                   url: URLTypes = "",
+                   *,
+                   headers: HeaderTypes = None,
+                   cookies: CookieTypes = None,
+                   content: RequestContent = None,
+                   data: RequestData = None,
+                   files: RequestFiles = None):
+        request = Request(Methods.patch.value, self.make_url(url),
+                          content=content,
+                          data=data,
+                          files=files,
+                          headers=headers,
+                          cookies=cookies)
+        return await self._send_request(request)
+
+    async def delete(self,
+                  url: URLTypes = "",
+                  *,
+                  params: QueryParamTypes = None,
+                  headers: HeaderTypes = None,
+                  cookies: CookieTypes = None):
+        request = Request(Methods.delete.value, self.make_url(url), params=params, headers=headers, cookies=cookies)
+        return await self._send_request(request)
 
     def __call__(self, *args, **kwargs):
         """
         Will trow an error that avoid BaseRESTAsyncClient to be called directly and force use the get_instance class method
         """
         raise TypeError("BaseClient cannot be called directly use get_instance class method instead")
-
-    async def get(self, url: str = "", params:dict={}):
-        async with httpx.AsyncClient() as client:
-            return await client.get(self.make_url(url))
