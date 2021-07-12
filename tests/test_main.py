@@ -74,7 +74,7 @@ async def test_get_async(http_client, internet_connection, httpx_mock, monkeypat
 @pytest.mark.asyncio
 @pytest.mark.parametrize("host, port, protocol, expected_status_code", [
     ("localhost", 3000, "http", 204),
-], ids=["Async get return expected status code"])
+], ids=["Async delete return expected status code"])
 async def test_delete_async(http_client, internet_connection, httpx_mock, monkeypatch, host: str, port: int,
                             protocol: str,
                             expected_status_code: int):
@@ -126,7 +126,7 @@ async def test_post_async(http_client, internet_connection, httpx_mock, monkeypa
          'Content-type': 'application/json; charset=UTF-8',
      },
      204),
-], ids=["Async post return expected status code"])
+], ids=["Async put return expected status code"])
 async def test_put_async(http_client, internet_connection, httpx_mock, monkeypatch, host: str, port: int,
                          protocol: str, body: dict[str, Any], headers: dict[str, str],
                          expected_status_code: int):
