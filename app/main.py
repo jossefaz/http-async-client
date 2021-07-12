@@ -1,13 +1,9 @@
-import typing
-from enum import Enum
 from functools import partial
 from typing import Union, Dict
-
+from app.enums import SupportedProtocols, Methods
 import httpx
 import re
-
 from dataclasses import dataclass
-
 from httpx._types import RequestContent, URLTypes, RequestData, RequestFiles, QueryParamTypes, HeaderTypes, CookieTypes
 from nanoid import generate
 import base64
@@ -19,7 +15,7 @@ class EndPointRegistry(type):
     def __init__(cls, *args, **kwargs):
         cls.__instance = None
         cls._locker = threading.Lock()
-        cls.endpoints_registry: dict[bytes, EndPoint] = {}
+        cls.endpoints_registry: Dict[bytes, EndPoint] = {}
         cls.current = bytes()
         super().__init__(*args, **kwargs)
 
@@ -47,17 +43,7 @@ class EndPointRegistry(type):
             raise TypeError(f"Cannot encode base url to registry : {str(te)}")
 
 
-class SupportedProtocols(Enum):
-    http = "http"
-    https = "https"
 
-
-class Methods(Enum):
-    get = "GET"
-    post = "POST"
-    put = "PUT"
-    patch = "PATCH"
-    delete = "DELETE"
 
 
 @dataclass
@@ -167,13 +153,13 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
         return await self._send_request(request)
 
     async def put(self,
-                   url: URLTypes = "",
-                   *,
-                   headers: HeaderTypes = None,
-                   cookies: CookieTypes = None,
-                   content: RequestContent = None,
-                   data: RequestData = None,
-                   files: RequestFiles = None):
+                  url: URLTypes = "",
+                  *,
+                  headers: HeaderTypes = None,
+                  cookies: CookieTypes = None,
+                  content: RequestContent = None,
+                  data: RequestData = None,
+                  files: RequestFiles = None):
         request = Request(Methods.put.value, self.make_url(url),
                           content=content,
                           data=data,
@@ -183,13 +169,13 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
         return await self._send_request(request)
 
     async def patch(self,
-                   url: URLTypes = "",
-                   *,
-                   headers: HeaderTypes = None,
-                   cookies: CookieTypes = None,
-                   content: RequestContent = None,
-                   data: RequestData = None,
-                   files: RequestFiles = None):
+                    url: URLTypes = "",
+                    *,
+                    headers: HeaderTypes = None,
+                    cookies: CookieTypes = None,
+                    content: RequestContent = None,
+                    data: RequestData = None,
+                    files: RequestFiles = None):
         request = Request(Methods.patch.value, self.make_url(url),
                           content=content,
                           data=data,
@@ -199,11 +185,11 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
         return await self._send_request(request)
 
     async def delete(self,
-                  url: URLTypes = "",
-                  *,
-                  params: QueryParamTypes = None,
-                  headers: HeaderTypes = None,
-                  cookies: CookieTypes = None):
+                     url: URLTypes = "",
+                     *,
+                     params: QueryParamTypes = None,
+                     headers: HeaderTypes = None,
+                     cookies: CookieTypes = None):
         request = Request(Methods.delete.value, self.make_url(url), params=params, headers=headers, cookies=cookies)
         return await self._send_request(request)
 

@@ -16,7 +16,7 @@ from app.main import BaseRESTAsyncClient, EndPoint
      "http://example.com/gene/diseases/query"),
 ], ids=["Build a url with no port or protocol",
         "Build a url with a port and protocol",
-        "remove all redundant slashes",
+        "rall redundant slashes are removed from url",
         "work without the first slash"])
 def test_make_url(http_client: Type[BaseRESTAsyncClient], host, port, protocol, rel_url, expected_full_url):
     rest_client = http_client(host=host, port=port, protocol=protocol)
