@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'http_async_client',
   packages = ['http_async_client'],
-  version = '0.0.1',
+  version = '0.0.2',
   license='MIT',
   description = 'A simple http client for managing asynchronous requests',
   author = 'JossefAz',
@@ -14,6 +14,7 @@ setup(
       'pytest',
       'pytest-asyncio',
       'pytest-httpx',
+      'asyncio'
       'httpx',
       'nanoid'
       ],
