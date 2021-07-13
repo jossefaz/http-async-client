@@ -341,6 +341,26 @@
     EndPointRegistry
   </a>
   
+    <nav class="md-nav" aria-label="EndPointRegistry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http_async_client.base.EndPointRegistry.__call__" class="md-nav__link">
+    __call__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http_async_client.base.EndPointRegistry.add_to_reg" class="md-nav__link">
+    add_to_reg()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -511,6 +531,26 @@
   <a href="#http_async_client.base.EndPointRegistry" class="md-nav__link">
     EndPointRegistry
   </a>
+  
+    <nav class="md-nav" aria-label="EndPointRegistry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http_async_client.base.EndPointRegistry.__call__" class="md-nav__link">
+    __call__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http_async_client.base.EndPointRegistry.add_to_reg" class="md-nav__link">
+    add_to_reg()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1489,6 +1529,13 @@
     <div class="doc doc-contents ">
 
       <p>This Class is a singleton that inherits from the <code>type</code> class, in order to provide it as a metaclass to other classes</p>
+<p>This class is the core of the HTTP client that differs from others client, because it will allow to manage different
+domains within the same class</p>
+<p>This is very useful for example if you need to send request to different third party APIS and you want to follow the
+way of that request with a same request ID.</p>
+<p>With this class you can keep a domain registry. Every new domain will be registered to this class. On each new call,
+it will check if the domain exists in the registry and if not il will
+create and entry for it. Afterward it will set this domain as the current domain.</p>
 
 
 
@@ -1503,6 +1550,174 @@
 
 
 
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="http_async_client.base.EndPointRegistry.__call__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Instantiate the Singleton using the thread library in order to guarantee only one instance !</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>host</code></td>
+        <td><code></code></td>
+        <td><p>string, the domain's host</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>port</code></td>
+        <td><code></code></td>
+        <td><p>int : Optional</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>protocol</code></td>
+        <td><code></code></td>
+        <td><p>string, must be a member of the SupportedProtocol Enum</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>cls.__instance </code></td>
+      <td><p>EndPointRegistry instance</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>http_async_client/base.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Instantiate the Singleton using the thread library in order to guarantee only one instance !</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        host: string, the domain&#39;s host</span>
+<span class="sd">        port: int : Optional</span>
+<span class="sd">        protocol : string, must be a member of the SupportedProtocol Enum</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        cls.__instance : EndPointRegistry instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_locker</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="c1"># On each call : add to registry (if it is already in the reg, it wont be added but only defined as current)</span>
+    <span class="bp">cls</span><span class="o">.</span><span class="n">add_to_reg</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instance</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="http_async_client.base.EndPointRegistry.add_to_reg" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">add_to_reg</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Method that will create and eventually add a class EndPoint instance object and will add it to the registry if its base64 url is not present in it
+In that way, if there is the same origin with two different ports, it will be two different entry in the registry</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>host</code></td>
+        <td><code></code></td>
+        <td><p>string, the domain's host</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>port</code></td>
+        <td><code></code></td>
+        <td><p>int : Optional</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>protocol</code></td>
+        <td><code></code></td>
+        <td><p>string, must be a member of the SupportedProtocol Enum</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>http_async_client/base.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">add_to_reg</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Method that will create and eventually add a class EndPoint instance object and will add it to the registry if its base64 url is not present in it</span>
+<span class="sd">    In that way, if there is the same origin with two different ports, it will be two different entry in the registry</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        host: string, the domain&#39;s host</span>
+<span class="sd">        port: int : Optional</span>
+<span class="sd">        protocol : string, must be a member of the SupportedProtocol Enum</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;port&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">protocol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;protocol&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;host&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">end_point</span> <span class="o">=</span> <span class="n">EndPoint</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">end_point</span><span class="o">.</span><span class="n">base_url</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;EndPointRegistry error trying to add new client : host is missing&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">end_point_key</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">end_point</span><span class="o">.</span><span class="n">base_url</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">end_point_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">endpoints_registry</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">endpoints_registry</span><span class="p">[</span><span class="n">end_point_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_point</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">end_point_key</span>
+    <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">te</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot encode base url to registry : </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">te</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
 
 
 
@@ -1600,7 +1815,10 @@
 
     <div class="doc doc-contents ">
 
-      <p>Contains a list of all supported protocols (currently only http and https</p>
+      <p>Contains a list of all supported protocols (currently only http and https
+!!! value
+    http : "http"
+    https : "https"</p>
 
 
 
