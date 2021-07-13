@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'http_async_client',
   packages = ['http_async_client'],
-  version = '0.0.3',
+  version = '0.0.4',
   license='MIT',
   description = 'A simple http client for managing asynchronous requests',
   author = 'JossefAz',
