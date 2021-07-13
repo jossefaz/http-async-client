@@ -1,6 +1,6 @@
 import urllib.request
 import pytest
-from async_http_client.base import BaseRESTAsyncClient
+from http_async_client.base import BaseRESTAsyncClient
 
 REAL_API_CALL_HOSTS = ["google.com", "jsonplaceholder.typicode.com", "localhost"]
 

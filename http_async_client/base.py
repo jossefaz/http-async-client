@@ -13,6 +13,16 @@ from httpx import Request
 
 class EndPointRegistry(type):
     """This Class is a singleton that inherits from the `type` class, in order to provide it as a metaclass to other classes
+
+    This class is the core of the HTTP client that differs from others client, because it will allow to manage different
+    domains within the same class
+
+    This is very useful for example if you need to send request to different third party APIS and you want to follow the
+    way of that request with a same request ID.
+
+    With this class you can keep a domain registry. Every new domain will be registered to this class. On each new call,
+    it will check if the domain exists in the registry and if not il will
+    create and entry for it. Afterward it will set this domain as the current domain.
     """
 
     def __init__(cls, *args, **kwargs):
@@ -23,14 +33,34 @@ class EndPointRegistry(type):
         super().__init__(*args, **kwargs)
 
     def __call__(cls, *args, **kwargs):
+        """
+        Instantiate the Singleton using the thread library in order to guarantee only one instance !
+
+        Arguments:
+            host: string, the domain's host
+            port: int : Optional
+            protocol : string, must be a member of the SupportedProtocol Enum
+
+        Returns:
+            cls.__instance : EndPointRegistry instance
+        """
         if cls.__instance is None:
             with cls._locker:
                 if cls.__instance is None:
                     cls.__instance = super().__call__(*args, **kwargs)
+        # On each call : add to registry (if it is already in the reg, it wont be added but only defined as current)
         cls.add_to_reg(**kwargs)
         return cls.__instance
 
     def add_to_reg(cls, **kwargs):
+        """Method that will create and eventually add a class EndPoint instance object and will add it to the registry if its base64 url is not present in it
+        In that way, if there is the same origin with two different ports, it will be two different entry in the registry
+        Arguments:
+            host: string, the domain's host
+            port: int : Optional
+            protocol : string, must be a member of the SupportedProtocol Enum
+
+        """
         port = kwargs.get("port", None)
         protocol = kwargs.get("protocol", None)
         host = kwargs.get("host", None)
@@ -106,9 +136,12 @@ class BaseRESTAsyncClient(metaclass=EndPointRegistry):
         return str(self._request_id)
 
     @request_id.setter
-    def request_id(self, value):
+    def request_id(self, req_id):
         """Setter for the request id
-        TODO: Check if there is any pre existing request ID from the incoming request headers and generate one ONLY IF there is no
+        Arguments:
+            req_id : UID (nanoid) of the request
+        Todo:
+            * Check if there is any pre existing request ID from the incoming request headers and generate one ONLY IF there is no
         """
         self._request_id = generate()
 
