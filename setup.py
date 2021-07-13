@@ -8,7 +8,7 @@ setup(
   author = 'JossefAz',
   author_email = 'jossefaz@protonmail.com',
   url = 'https://github.com/jossefaz/http-async-client',
-  download_url = 'https://github.com/jossefaz/http-async-client/archive/refs/tags/0.0.3.tar.gz',
+  download_url = 'https://github.com/jossefaz/http-async-client/archive/refs/tags/0.0.4.tar.gz',
   keywords = ['async', 'httpx', 'client', 'microservices', 'SOA'],
   install_requires=[
       'pytest',
