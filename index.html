@@ -220,15 +220,29 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#first-step-import-it" class="md-nav__link">
-    First Step : Import it
+  <a href="#first-step-install-it" class="md-nav__link">
+    First Step : Install it
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#second-step-use-it" class="md-nav__link">
-    Second Step : Use it
+  <a href="#second-step-import-it" class="md-nav__link">
+    Second Step : Import it
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#third-step-use-it" class="md-nav__link">
+    Third Step : Use it
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-example" class="md-nav__link">
+    Full example
   </a>
   
 </li>
@@ -295,15 +309,29 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#first-step-import-it" class="md-nav__link">
-    First Step : Import it
+  <a href="#first-step-install-it" class="md-nav__link">
+    First Step : Install it
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#second-step-use-it" class="md-nav__link">
-    Second Step : Use it
+  <a href="#second-step-import-it" class="md-nav__link">
+    Second Step : Import it
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#third-step-use-it" class="md-nav__link">
+    Third Step : Use it
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-example" class="md-nav__link">
+    Full example
   </a>
   
 </li>
@@ -334,16 +362,35 @@ This is the role of the HTTP Client.</p>
 <p>However, the relatively new way of asynchronous programming which improve dramatically the performance by giving control back to the main thread on each new single asynchronous task, 
 force us to program in an asynchronous way along all each incoming request (if this one started as asynchronous, we must continue it, otherwise the main thread will be blocked again).</p>
 <p>This library provides a simple class that manage the HTTP communication in an asynchronous way.</p>
-<h3 id="first-step-import-it">First Step : Import it</h3>
-<pre><code class="language-python">from async_http_client import async_client_factory
+<h3 id="first-step-install-it">First Step : Install it</h3>
+<pre><code class="language-shell">pip install http_async_client
+</code></pre>
+<h3 id="second-step-import-it">Second Step : Import it</h3>
+<pre><code class="language-python">from http_async_client import async_client_factory
 
 client = async_client_factory(host=&quot;example.com&quot;, port=8080, protocol=&quot;https&quot;)
 </code></pre>
-<h3 id="second-step-use-it">Second Step : Use it</h3>
+<h3 id="third-step-use-it">Third Step : Use it</h3>
 <pre><code class="language-python">async def get_my_resource(dummy_id):
     return await client().get(f&quot;/{dummy_id}&quot;)
 </code></pre>
-<p>Since client is a factory, we need to call it (notice the <code>client()</code> syntaxe here) on every use (for further explanation, check API Reference</p>
+<p>Since client is a factory, we need to call it (notice the <code>client()</code> syntaxe here) on every use (for further explanation, check <a href="https://jossefaz.github.io/http-async-client/api.html">API Reference</a></p>
+<h3 id="full-example">Full example</h3>
+<pre><code class="language-python">
+from http_async_client import async_client_factory
+import asyncio
+
+client = async_client_factory(host=&quot;google.com&quot;, protocol=&quot;https&quot;)
+
+async def get_my_resource():
+    response = await client().get()
+    print(response.text)
+
+asyncio.run(get_my_resource())
+</code></pre>
+<p><strong><em>OUTPUT </em></strong></p>
+<pre><code class="language-shell">&lt;!doctype html&gt;&lt;html dir=&quot;rtl&quot; itemscope=&quot;&quot; itemtype=&quot;http://schema.org/WebPage&quot; lang=&quot;iw&quot;&gt;&lt;head&gt;&lt;meta content=&quot;text/html; charset=UTF-8&quot; http-equiv=&quot;Content-Type&quot;&gt;&lt;meta c.....
+</code></pre>
                 
               
               
