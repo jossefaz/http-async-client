@@ -1,6 +1,6 @@
 from functools import partial
 from typing import Union, Dict, Optional
-from app.enums import SupportedProtocols, Methods
+from async_http_client.enums import SupportedProtocols, Methods
 import httpx
 import re
 from dataclasses import dataclass

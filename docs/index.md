@@ -15,7 +15,7 @@ This library provides a simple class that manage the HTTP communication in an as
 ### First Step : Install it
 
 ```shell
-pip install async_http_client
+pip install http_async_client
 ```
 
 ### Second Step : Import it

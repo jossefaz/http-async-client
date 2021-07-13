@@ -1,14 +1,14 @@
 from distutils.core import setup
 setup(
-  name = 'async_http_client',
-  packages = ['async_http_client'],   # Chose the same as "name"
+  name = 'http_async_client',
+  packages = ['http_async_client'],   # Chose the same as "name"
   version = '0.0.1',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'A simple http client for managing asynchronous requests',   # Give a short description about your library
   author = 'JossefAz',                   # Type in your name
   author_email = 'jossefaz@protonmail.com',      # Type in your E-Mail
-  url = 'https://github.com/jossefaz/async-http-client',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/ossefaz/async-http-client/archive/refs/tags/0.0.1.tar.gz',    # I explain this later on
+  url = 'https://github.com/jossefaz/http-async-client',   # Provide either the link to your github or to your website
+  download_url = 'https://github.com/jossefaz/http-async-client/archive/refs/tags/0.0.1.tar.gz',    # I explain this later on
   keywords = ['async', 'httpx', 'client', 'microservices', 'SOA'],   # Keywords that define your package best
   install_requires=[
       'pytest',

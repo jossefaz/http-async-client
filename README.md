@@ -15,13 +15,13 @@ This library provides a simple class that manage the HTTP communication in an as
 ### First Step : Install it
 
 ```shell
-pip install async_http_client
+pip install http_async_client
 ```
 
 ### Second Step : Import it
 
 ```python
-from async_http_client import async_client_factory
+from http_async_client import async_client_factory
 
 client = async_client_factory(host="example.com", port=8080, protocol="https")
 ```
@@ -33,5 +33,5 @@ async def get_my_resource(dummy_id):
     return await client().get(f"/{dummy_id}")
 ```
  
-Since client is a factory, we need to call it (notice the `client()` syntaxe here) on every use (for further explanation, check API Reference
+Since client is a factory, we need to call it (notice the `client()` syntaxe here) on every use (for further explanation, check [API Reference](https://jossefaz.github.io/http-async-client/api.html)
 

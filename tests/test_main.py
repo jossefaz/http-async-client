@@ -1,7 +1,7 @@
 from typing import Type, Any
 import pytest
 from pytest_httpx import HTTPXMock
-from app.base import BaseRESTAsyncClient, EndPoint
+from async_http_client.base import BaseRESTAsyncClient, EndPoint
 
 
 @pytest.mark.http_async
